@@ -2,6 +2,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import settings
 import ephem
+import datetime
+
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
 
@@ -16,10 +18,17 @@ def talk_to_me(update, context):
     update.message.reply_text(text)
 
 def get_coord(update, context):
-    planet = update.message.text.split()[-1]
-    if planet == 'mars' or 'Mars':
-        const = ephem.constellation(ephem.Mars('2023/05/05'))
-        update.message.reply_text(const)
+    user_planet = update.message.text.split()[-1].lower()
+    
+    date = datetime.datetime.today()
+    planet_dict = {'mercury': ephem.Mercury(date),
+                   'venus': ephem.Venus(date), 'mars': ephem.Mars(date),
+                   'jupiter': ephem.Jupiter(date), 'saturn': ephem.Saturn(date),
+                   'uranus': ephem.Uranus(date), 'neptune': ephem.Neptune(date)}
+    user_planet = planet_dict[user_planet]
+
+    const = ephem.constellation(user_planet)[-1]
+    update.message.reply_text(const)
 
 def main():
     mybot = Updater(settings.API_KEY)
